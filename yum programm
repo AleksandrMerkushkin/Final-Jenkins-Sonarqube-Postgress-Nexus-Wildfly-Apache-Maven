@@ -1,0 +1,9 @@
+yum update -y  
+yum install epel-release -y
+yum install net-tools -y
+yum install nano -y
+yum install java-11-openjdk-devel -y   
+yum install git -y
+yum install wget -y
+yum install unzip -y
+yum install policycoreutils-python setroubleshooting -y

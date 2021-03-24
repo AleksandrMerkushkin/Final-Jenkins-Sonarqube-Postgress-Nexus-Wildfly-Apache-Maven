@@ -1,0 +1,35 @@
+cd /opt/
+curl -O https://download.jboss.org/wildfly/16.0.0.Final/wildfly-16.0.0.Final.tar.gz
+tar xf wildfly-16.0.0.Final.tar.gz -C /opt/
+rm -Rf wildfly-16.0.0.Final.tar.gz
+ln -s /opt/wildfly-16.0.0.Final/ /opt/wildfly
+useradd -r -d /opt/wildfly -s /sbin/nologin wildfly
+chown -RH wildfly:wildfly /opt/wildfly
+mkdir /etc/wildfly
+cp /opt/wildfly/docs/contrib/scripts/systemd/wildfly.conf /etc/wildfly/
+cat /etc/wildfly/wildfly.conf
+cp /opt/wildfly/docs/contrib/scripts/systemd/launch.sh /opt/wildfly/bin/
+cp /opt/wildfly/docs/contrib/scripts/systemd/wildfly.service /usr/lib/systemd/system/
+mkdir /var/run/wildfly/
+chown -R wildfly:wildfly /var/run/wildfly/
+systemctl enable wildfly.service && systemctl start wildfly.service
+
+#Настройка пользователя
+/opt/wildfly/bin/add-user.sh
+a
+jboss
+jboss
+enter
+yes
+yes
+cat >> /etc/wildfly/wildfly.conf << EOF
+WILDFLY_CONSOLE_BIND=0.0.0.0
+EOF
+nano /opt/wildfly/bin/launch.sh
+bmanagement $4
+nano /usr/lib/systemd/system/wildfly.service
+$WILDFLY_CONSOLE_BIND
+nano /opt/wildfly/standalone/configuration/standalone.xml
+<socket-binding-group name="standard-sockets" default-interface="public" port-offset="${jboss.socket.binding.port-offset:9900}">
+<socket-binding name="http" port="${jboss.http.port:8083}"/>
+systemctl daemon-reload && systemctl restart wildfly.service

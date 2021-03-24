@@ -1,0 +1,8 @@
+wget -P /etc/yum.repos.d/ https://pkg.jenkins.io/redhat-stable/jenkins.repo
+rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+yum install jenkins
+service jenkins start && systemctl enable jenkins
+cat /var/lib/jenkins/secrets/initialAdminPassword
+
+#Установка плагинов: git, maven, ant, pipeline, Jenkins Clone Workspace SCM, install Build Pipeline Plugin, Radiator View Plugin, SonarQube Scanner, Email Extension, Email Ext Recipients Column, Config file provider, Role-based Authorization Strategy, Authorize Project, Nexus Platform,  Nexus ArtifactUploader and Pipeline Utility Steps, green balls, 
+#CopyArtifact, Pipeline Maven Integration

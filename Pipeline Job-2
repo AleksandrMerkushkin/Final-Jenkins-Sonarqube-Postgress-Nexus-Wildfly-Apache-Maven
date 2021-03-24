@@ -1,0 +1,41 @@
+pipeline {
+    agent {
+        label "master"
+    }
+    stages {
+      stage("Fetching artefact from Job-1") {
+        steps {
+        script {
+        //build job: "Job-1", wait: true
+        step ([$class: 'CopyArtifact',
+          projectName: "Job-1",
+          filter: 'target/*.war']);
+            }
+              }
+            }
+        stage('Archive') {
+                steps {
+                    sh 'cd $WORKSPACE/target/ && tar -cf ${BUILD_NUMBER}.tar.gz mywebapp.war'
+                }
+            }
+        stage("Deploy and send email") {
+        steps {
+            sh './deploy.sh'
+              }
+      post {
+        unstable {
+            emailext body: '$DEFAULT_CONTENT', subject: '$DEFAULT_SUBJECT', to: 'ksander62@yandex.ru'
+        }
+        notBuilt {
+            emailext body: '$DEFAULT_CONTENT', subject: '$DEFAULT_SUBJECT', to: 'ksander62@yandex.ru'
+        }
+        aborted {
+            emailext body: '$DEFAULT_CONTENT', subject: '$DEFAULT_SUBJECT', to: 'ksander62@yandex.ru'
+        }
+        failure {
+            emailext body: '$DEFAULT_CONTENT', subject: '$DEFAULT_SUBJECT', to: 'ksander62@yandex.ru'
+        }
+    }
+                                      }
+}
+}

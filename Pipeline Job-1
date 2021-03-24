@@ -1,0 +1,66 @@
+pipeline {
+    agent {
+        label "master"
+    }
+    stages {
+        stage ('Cloning Git') {
+            steps {
+                script {
+                git branch: 'master', url: 'https://github.com/AleksandrMerkushkin/webappwar'
+                       }
+                  }
+                                     }
+        stage ('Building') {
+            steps {
+                script {
+                sh 'mvn clean package'
+                       }
+                  }
+                                      }
+        stage ('Publishing test results') {
+            steps {
+                script {
+                junit 'target/surefire-reports/*.xml'
+                       }
+                  }
+                                      }                              
+        stage ('Archiving artifacts') {
+            steps {
+                script {
+                archiveArtifacts 'target/*.war'
+                       }
+                 }
+                                     }
+        stage ('Uploading artifact to Nexus') {
+            steps {
+                script {
+                nexusPublisher nexusInstanceId: 'Nexus', nexusRepositoryId: 'maven-releases', packages: [[$class: 'MavenPackage', mavenAssetList: [[classifier: '', extension: '', filePath: 'target/mywebapp.war']], mavenCoordinate: [artifactId: 'WebApp', groupId: 'denofprogramming', packaging: 'war', version: '$BUILD_NUMBER']]]
+                       }
+            }   
+                                            }
+        stage ('Testing code with sonar') {
+            steps {
+                script {
+                    sh 'mvn sonar:sonar ' +
+                    '-Dsonar.projectKey=Final ' +
+                    '-Dsonar.host.url=http://sonarfinal ' +
+                    '-Dsonar.login=cf370735fa91be3288e7593f5951ef86e9a352bb '
+                        }    
+                                        }
+    post {
+        unstable {
+            emailext body: '$DEFAULT_CONTENT', subject: '$DEFAULT_SUBJECT', to: 'ksander62@yandex.ru'
+        }
+        notBuilt {
+            emailext body: '$DEFAULT_CONTENT', subject: '$DEFAULT_SUBJECT', to: 'ksander62@yandex.ru'
+        }
+        aborted {
+            emailext body: '$DEFAULT_CONTENT', subject: '$DEFAULT_SUBJECT', to: 'ksander62@yandex.ru'
+        }
+        failure {
+            emailext body: '$DEFAULT_CONTENT', subject: '$DEFAULT_SUBJECT', to: 'ksander62@yandex.ru'
+        }
+    }
+}
+}
+}

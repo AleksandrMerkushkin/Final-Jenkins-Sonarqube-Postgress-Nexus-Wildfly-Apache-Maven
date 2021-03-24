@@ -1,0 +1,28 @@
+pipeline {
+    agent {
+        label "master"
+    }
+    stages {
+        stage ('Verification') {
+            steps {
+                script {
+                def get = new URL("http://192.168.33.20:8083/mywebapp").openConnection()
+                def getRC = get.getResponseCode()
+                println(getResponseCode)
+                if (getResponseCode =~ "200") {
+                    echo 'Its works!'
+                }    
+                else {
+                    currentBuild.result="FAILURE"
+                    echo 'Its not works!'
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always {
+            emailext body: '$DEFAULT_CONTENT', subject: '$DEFAULT_SUBJECT', to: 'ksander62@yandex.ru'
+        }
+    }
+}

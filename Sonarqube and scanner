@@ -1,0 +1,64 @@
+#Sonarqube
+nano /etc/sysctl.conf
+vm.max_map_count = 262144
+fs.file-max = 65536
+wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-8.7.0.41497.zip
+unzip sonarqube-8.7.0.41497.zip -d /opt
+mv /opt/sonarqube-8.7.0.41497 /opt/sonarqube
+rm sonarqube-8.7.0.41497.zip
+nano /opt/sonarqube/conf/sonar.properties
+sonar.jdbc.username=sonar
+sonar.jdbc.password=sonar
+sonar.jdbc.url=jdbc:postgresql://localhost/sonar
+sonar.web.host=192.168.33.20 
+sonar.web.port=9000
+nano /etc/systemd/system/sonar.service
+[Unit]
+Description=SonarQube service
+After=syslog.target network.target
+[Service]
+Type=forking
+ExecStart=/opt/sonarqube/bin/linux-x86-64/sonar.sh start
+ExecStop=/opt/sonarqube/bin/linux-x86-64/sonar.sh stop
+LimitNOFILE=65536
+LimitNPROC=4096
+User=sonar
+Group=sonar
+Restart=always
+[Install]
+WantedBy=multi-user.target
+groupadd sonar
+useradd -g sonar -s /bin/false -m -r  sonar
+chown -R sonar:sonar /opt/sonarqube
+nano /etc/sysctl.conf
+vm.max_map_count = 262144
+fs.file-max = 65536
+
+#PostgreSQL
+sudo yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+sudo yum install -y postgresql12-server
+sudo /usr/pgsql-12/bin/postgresql-12-setup initdb
+nano /var/lib/pgsql/12/data/pg_hba.conf 
+systemctl enable postgresql-12 && systemctl start postgresql-12
+passwd postgres
+su – postgres
+psql -U postgres -W (postgre)
+create user sonar;
+alter role sonar with createdb;
+alter user sonar with encrypted password 'sonar';
+create database sonar owner sonar;
+grant all privileges on database sonar to sonar;
+\q
+
+#Продолжение установки sonarа
+systemctl start sonar && systemctl enable sonar
+Логин и пароль admin
+
+#Sonar scanner
+wget https://github.com/SonarSource/sonar-scanner-cli/releases/download/4.4.0.2170/sonar-scanner-cli-4.4.0.2170-linux.zip
+unzip sonar-scanner-cli-4.4.0.2170-linux.zip
+mv sonar-scanner-4.4.0.2170-linux/ sonar-scanner
+nano /opt/sonar-scanner/conf/sonar-scanner.properties  
+sonar.host.url=http://sonarfinal
+chmod +x /opt/sonar-scanner/bin/sonar-scanner
+ln -s /opt/sonar-scanner/bin/sonar-scanner /usr/local/bin/sonar-scanner

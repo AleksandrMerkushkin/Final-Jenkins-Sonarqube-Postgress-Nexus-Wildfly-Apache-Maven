@@ -1,0 +1,32 @@
+wget https://download.sonatype.com/nexus/3/latest-unix.tar.gz
+tar -xvzf latest-unix.tar.gz -C /opt/
+rm -Rf latest-unix.tar.gz
+mv nexus-3.29.2-02 nexus
+mv sonatype-work nexusdata
+useradd --system --no-create-home nexus
+chown -R nexus:nexus /opt/nexus
+chown -R nexus:nexus /opt/nexusdata
+nano /opt/nexus/bin/nexus.vmoptions
+-XX:LogFile=../nexusdata/nexus3/log/jvm.log
+-Dkaraf.data=../nexusdata/nexus3
+-Dkaraf.log=../nexusdata/nexus3/log
+-Djava.io.tmpdir=../nexusdata/nexus3/tmp
+nano /opt/nexus/bin/nexus.rc
+run_as_user="nexus"
+nano /etc/systemd/system/nexus.service
+[Unit]
+Description=Nexus Service
+After=syslog.target network.target
+[Service]
+Type=forking
+LimitNOFILE=65536
+ExecStart=/opt/nexus/bin/nexus start
+ExecStop=/opt/nexus/bin/nexus stop
+User=nexus
+Group=nexus
+Restart=on-failure
+[Install]
+WantedBy=multi-user.target
+systemctl daemon-reload && systemctl enable nexus
+systemctl enable nexus && systemctl start nexus
+nano /opt/nexusdata/nexus3/admin.password #пароль

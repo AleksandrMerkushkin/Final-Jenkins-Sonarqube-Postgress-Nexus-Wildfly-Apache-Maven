@@ -1,0 +1,31 @@
+nano /etc/httpd/conf.d/jenkins.conf
+<VirtualHost *:80>
+  ProxyPreserveHost On
+  ServerName jenkinsfinal
+  ProxyPass / http://192.168.33.20:8080/
+  ProxyPassReverse / http://192.168.33.20:8080/
+</VirtualHost>
+nano /etc/httpd/conf.d/nexus.conf
+<VirtualHost *:80>
+  ProxyPreserveHost On
+  ServerName nexusfinal
+  ProxyPass / http://192.168.33.20:8081/
+  ProxyPassReverse / http://192.168.33.20:8081/
+</VirtualHost>
+nano /etc/httpd/conf.d/sonar.conf
+<VirtualHost *:80>
+  ProxyPreserveHost On
+  ServerName sonarfinal
+  ProxyPass / http://192.168.33.20:9000/
+  ProxyPassReverse / http://192.168.33.20:9000/
+</VirtualHost>
+
+#nano /etc/hosts.conf
+#example
+#ip nexus 
+
+#в hosts
+#C:\Windows\System32\drivers\etc
+#192.168.33.20 jenkinsfinal	
+#192.168.33.20 nexusfinal
+#192.168.33.20 sonarfinal
